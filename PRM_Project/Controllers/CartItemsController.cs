@@ -27,14 +27,14 @@ namespace PRM_Project.Controllers
         [Route("{id:int}")]
         public async Task<ActionResult<CartItem>> GetCartItembyID(int id)
         {
-            var cart = await dbContext.CartItems.FindAsync(id);
+            var cartItems = await dbContext.CartItems.FindAsync(id);
 
-            if (cart == null)
+            if (cartItems == null)
             {
                 return NotFound();
             }
 
-            return Ok(cart);
+            return Ok(cartItems);
         }
 
         [HttpPost]
@@ -90,6 +90,8 @@ namespace PRM_Project.Controllers
             await dbContext.SaveChangesAsync();
             return Ok();
         }
+
+        
 
     }
 }

@@ -43,7 +43,7 @@ namespace PRM_Project.Controllers
             var userObject = new User()
             {
                 Username = user.Username,
-                PasswordHash = user.PasswordHash,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(user.PasswordHash),
                 Email = user.Email,
                 PhoneNumber = user.PhoneNumber,
                 Address = user.Address,
@@ -69,7 +69,7 @@ namespace PRM_Project.Controllers
             }
 
             user.Username = updateUser.Username;
-            user.PasswordHash = updateUser.PasswordHash;
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(updateUser.PasswordHash);
             user.Email = updateUser.Email;
             user.PhoneNumber = updateUser.PhoneNumber;
             user.Address = updateUser.Address;
