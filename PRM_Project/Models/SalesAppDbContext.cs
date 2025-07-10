@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace PRM_Project.Models;
 
-public partial class SalesAppDbContext : DbContext
+public partial class SalesAppDbContext : IdentityDbContext<User, IdentityRole<int>, int>
 {
     public SalesAppDbContext()
     {
@@ -37,6 +39,8 @@ public partial class SalesAppDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
+
         modelBuilder.Entity<Cart>(entity =>
         {
             entity.HasKey(e => e.CartId).HasName("PK__Carts__51BCD797E389B82A");
@@ -178,19 +182,20 @@ public partial class SalesAppDbContext : DbContext
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.UserId).HasName("PK__Users__1788CCAC0596C176");
-
-            entity.Property(e => e.UserId).HasColumnName("UserID");
+            entity.Property(e => e.Id)
+          .HasColumnName("UserID") // Optional: map to 'UserID' column name
+          .ValueGeneratedOnAdd();  // Ensures auto-increment
             entity.Property(e => e.Address).HasMaxLength(255);
             entity.Property(e => e.Email).HasMaxLength(100);
             entity.Property(e => e.PasswordHash).HasMaxLength(255);
             entity.Property(e => e.PhoneNumber).HasMaxLength(15);
             entity.Property(e => e.Role).HasMaxLength(50);
-            entity.Property(e => e.Username).HasMaxLength(50);
+            entity.Property(e => e.UserName).HasMaxLength(50);
         });
 
         OnModelCreatingPartial(modelBuilder);
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+
 }

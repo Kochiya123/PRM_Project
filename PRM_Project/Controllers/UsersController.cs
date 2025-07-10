@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PRM_Project.Models;
@@ -9,25 +10,27 @@ namespace PRM_Project.Controllers
     [ApiController]
     public class Users : ControllerBase
     {
-        private readonly SalesAppDbContext dbContext;
+        private readonly UserManager<User> _userManager;
+        private readonly RoleManager<IdentityRole<int>> _roleManager;
 
-        public Users(SalesAppDbContext dbContext)
+        public Users(UserManager<User> userManager, RoleManager<IdentityRole<int>> roleManager)
         {
-            this.dbContext = dbContext;
+            _userManager = userManager;
+            _roleManager = roleManager;
         }
 
         [HttpGet]
         public async Task<ActionResult<List<User>>> GetAllUser()
         {
-            var user = await dbContext.Users.ToListAsync();
+            var user = await _userManager.Users.ToListAsync();
             return Ok(user);
         }
 
-        [HttpGet]
+        /*[HttpGet]
         [Route("{id:int}")]
         public async Task<ActionResult<User>> GetUserbyID(int id)
         {
-            var user = await dbContext.Users.FindAsync(id);
+            var user = await _userManager.Users.FindAsync(id);
 
             if (user == null)
             {
@@ -35,65 +38,90 @@ namespace PRM_Project.Controllers
             }
 
             return Ok(user);
-        }
+        }*/
 
         [HttpPost]
-        public async Task<ActionResult<List<User>>> AddUser(AddUserDTO user)
+        public async Task<IActionResult> AddUser(AddUserDTO dto)
         {
-            var userObject = new User()
+            var user = new User
             {
-                Username = user.Username,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(user.PasswordHash),
-                Email = user.Email,
-                PhoneNumber = user.PhoneNumber,
-                Address = user.Address,
-                Role = user.Role,
+                UserName = dto.Username,
+                Email = dto.Email,
+                PhoneNumber = dto.PhoneNumber,
+                Address = dto.Address,
+                Role = dto.Role
             };
 
-            dbContext.Users.Add(userObject);
-            await dbContext.SaveChangesAsync();
+            var result = await _userManager.CreateAsync(user, dto.Password);
 
-            return Ok(userObject);
-
-        }
-
-        [HttpPut]
-        [Route("{id:int}")]
-        public async Task<ActionResult<List<User>>> UpdateUser(int id, UpdateUserDTO updateUser)
-        {
-            var user = await dbContext.Users.FindAsync(id);
-
-            if (user == null)
+            if (!result.Succeeded)
             {
-                return NotFound(id);
+                var errors = result.Errors.Select(e => e.Description);
+                return BadRequest(new { Errors = errors });
             }
 
-            user.Username = updateUser.Username;
-            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(updateUser.PasswordHash);
-            user.Email = updateUser.Email;
-            user.PhoneNumber = updateUser.PhoneNumber;
-            user.Address = updateUser.Address;
-            user.Role = updateUser.Role;
+            // Create role if it doesn't exist
+            if (!await _roleManager.RoleExistsAsync(dto.Role))
+            {
+                await _roleManager.CreateAsync(new IdentityRole<int>(dto.Role));
+            }
 
-            await dbContext.SaveChangesAsync();
+            await _userManager.AddToRoleAsync(user, dto.Role);
+
+            return Ok(new
+            {
+                user.Id,
+                user.UserName,
+                user.Email,
+                user.PhoneNumber,
+                user.Address,
+                user.Role
+            });
+        }
+
+
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> UpdateUser(int id, UpdateUserDTO dto)
+        {
+            var user = await _userManager.FindByIdAsync(id.ToString());
+            if (user == null) return NotFound(id);
+
+            user.UserName = dto.Username;
+            user.Email = dto.Email;
+            user.PhoneNumber = dto.PhoneNumber;
+            user.Address = dto.Address;
+            user.Role = dto.Role;
+
+            var passwordHasher = new PasswordHasher<User>();
+            user.PasswordHash = passwordHasher.HashPassword(user, dto.Password);
+
+            var result = await _userManager.UpdateAsync(user);
+
+            if (!result.Succeeded)
+            {
+                var errors = result.Errors.Select(e => e.Description);
+                return BadRequest(new { Errors = errors });
+            }
 
             return Ok(user);
         }
 
-        [HttpDelete]
-        [Route("{id:int}")]
-        public async Task<ActionResult<List<User>>> DeleteUser(int id)
+
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> DeleteUser(int id)
         {
-            var user = await dbContext.Users.FindAsync(id);
-            if (user == null)
+            var user = await _userManager.FindByIdAsync(id.ToString());
+            if (user == null) return NotFound();
+
+            var result = await _userManager.DeleteAsync(user);
+            if (!result.Succeeded)
             {
-                return NotFound();
+                var errors = result.Errors.Select(e => e.Description);
+                return BadRequest(new { Errors = errors });
             }
 
-            dbContext.Users.Remove(user);
-            await dbContext.SaveChangesAsync();
             return Ok();
-        }
 
+        }
     }
 }
