@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PRM_Project.Models;
@@ -7,11 +8,12 @@ namespace PRM_Project.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class Products : ControllerBase
+    [Authorize]
+    public class ProductsController : ControllerBase
     {
         private readonly SalesAppDbContext dbContext;
 
-        public Products(SalesAppDbContext dbContext)
+        public ProductsController(SalesAppDbContext dbContext)
         {
             this.dbContext = dbContext;
         }

@@ -9,11 +9,11 @@ namespace PRM_Project.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class StoreLocations : ControllerBase
+    public class StoreLocationsController : ControllerBase
     {
         private readonly SalesAppDbContext dbContext;
 
-        public StoreLocations(SalesAppDbContext dbContext)
+        public StoreLocationsController(SalesAppDbContext dbContext)
         {
             this.dbContext = dbContext;
         }

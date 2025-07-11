@@ -15,17 +15,19 @@ namespace PRM_Project.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class Users : ControllerBase
+    public class UsersController : ControllerBase
     {
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<IdentityRole<int>> _roleManager;
         private readonly IConfiguration _config;
+        private readonly TokenHelper _jwtHelper;
 
-        public Users(UserManager<User> userManager, RoleManager<IdentityRole<int>> roleManager, IConfiguration config)
+        public UsersController(UserManager<User> userManager, RoleManager<IdentityRole<int>> roleManager, IConfiguration config, TokenHelper jwtTokenHelper)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _config = config;
+            _jwtHelper = jwtTokenHelper;
         }
 
         [HttpGet]
@@ -53,14 +55,15 @@ namespace PRM_Project.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> AddUser(AddUserDTO dto)
         {
-            var user = new User
-            {
-                UserName = dto.Username,
-                Email = dto.Email,
-                PhoneNumber = dto.PhoneNumber,
-                Address = dto.Address,
-                Role = dto.Role
-            };
+               
+               var user = new User
+               {
+                   UserName = dto.Username,
+                   Email = dto.Email,
+                   PhoneNumber = dto.PhoneNumber,
+                   Address = dto.Address,
+                   Role = dto.Role
+               };
 
             var result = await _userManager.CreateAsync(user, dto.Password);
 
@@ -95,7 +98,7 @@ namespace PRM_Project.Controllers
         {
             var user = await _userManager.FindByNameAsync(dto.Username);
             //Thêm handling error phù hợp
-            if (user == null )
+            if (user == null)
             {
                 return NotFound("username not found!");
             }else if (!await _userManager.CheckPasswordAsync(user, dto.Password))
@@ -103,27 +106,29 @@ namespace PRM_Project.Controllers
                 return Unauthorized("password isn't correct!");
             }
 
-                var authClaims = new List<Claim>
-    {
-        new Claim(ClaimTypes.Name, user.UserName),
-        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-    };
+            /* var authClaims = new List<Claim>
+ {
+     new Claim(ClaimTypes.Name, user.UserName),
+     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+ };
 
-            var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
+         var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
 
-            var token = new JwtSecurityToken(
-                issuer: _config["Jwt:Issuer"],
-                audience: _config["Jwt:Audience"],
-                expires: DateTime.UtcNow.AddHours(3),
-                claims: authClaims,
-                signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
-            );
+         var token = new JwtSecurityToken(
+             issuer: _config["Jwt:Issuer"],
+             audience: _config["Jwt:Audience"],
+             expires: DateTime.UtcNow.AddHours(3),
+             claims: authClaims,
+             signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
+         );
 
-            return Ok(new
-            {
-                token = new JwtSecurityTokenHandler().WriteToken(token),
-                expiration = token.ValidTo
-            });
+         return Ok(new
+         {
+             token = new JwtSecurityTokenHandler().WriteToken(token),
+             expiration = token.ValidTo
+         });*/
+            var token = _jwtHelper.GenerateToken(dto.Username);
+            return Ok(new {Token = token});
         }
 
 
