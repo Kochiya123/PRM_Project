@@ -1,4 +1,5 @@
 ﻿using Microsoft.IdentityModel.Tokens;
+using PRM_Project.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
@@ -13,7 +14,7 @@ public class TokenHelper
         _configuration = configuration;
     }
 
-    public string GenerateToken(string username)
+    public string GenerateToken(User user)
     {
         var secretKey = Encoding.ASCII.GetBytes(_configuration["JwtSettings:SecretKey"]);
         var tokenHandler = new JwtSecurityTokenHandler();
@@ -21,7 +22,8 @@ public class TokenHelper
         {
             Subject = new ClaimsIdentity(new Claim[]
             {
-                new Claim(ClaimTypes.Name, username)
+                new Claim(ClaimTypes.Name, user.UserName),
+                new Claim(ClaimTypes.Email, user.Email)
             }),
             Expires = DateTime.UtcNow.AddMinutes(int.Parse(_configuration["JwtSettings:ExpiryInMinutes"])),
             Issuer = _configuration["JwtSettings:Issuer"],

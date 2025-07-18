@@ -51,7 +51,7 @@ namespace PRM_Project.Controllers
             return Ok(user);
         }*/
 
-        [HttpPost]
+        [HttpPost("signup")]
         [AllowAnonymous]
         public async Task<IActionResult> AddUser(AddUserDTO dto)
         {
@@ -92,9 +92,9 @@ namespace PRM_Project.Controllers
             });
         }
 
-        [HttpPost("login")]
+        [HttpPost("signin")]
         [AllowAnonymous]
-        public async Task<IActionResult> Login([FromBody] LoginDto dto)
+        public async Task<IActionResult> Login([FromBody] LoginDto dto, string? phoneNumber)
         {
             var user = await _userManager.FindByNameAsync(dto.Username);
             //Thêm handling error phù hợp
@@ -128,7 +128,15 @@ namespace PRM_Project.Controllers
              expiration = token.ValidTo
          });*/
             var token = _jwtHelper.GenerateToken(dto.Username);
-            return Ok(new {Token = token});
+            return Ok(new {
+                user.Id,
+                user.UserName,
+                user.Email,
+                user.Address,
+                user.PhoneNumber,
+                user.Role,
+                Token = token
+            });
         }
 
 

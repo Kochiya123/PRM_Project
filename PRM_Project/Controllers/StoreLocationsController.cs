@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PRM_Project.Models;
+using static System.Net.WebRequestMethods;
 
 namespace PRM_Project.Controllers
 {
@@ -12,10 +13,11 @@ namespace PRM_Project.Controllers
     public class StoreLocationsController : ControllerBase
     {
         private readonly SalesAppDbContext dbContext;
-
-        public StoreLocationsController(SalesAppDbContext dbContext)
+        private ILogger _logger;
+        public StoreLocationsController(SalesAppDbContext dbContext, ILogger logger)
         {
             this.dbContext = dbContext;
+            this._logger = logger;
         }
 
         [HttpGet]
@@ -48,8 +50,14 @@ namespace PRM_Project.Controllers
                 Longitude = StoreLocation.Longitude,
                 Address = StoreLocation.Address,
             };
-
-            dbContext.StoreLocations.Add(storeLocationObject);
+            try
+            {
+                dbContext.StoreLocations.Add(storeLocationObject);
+            }
+            catch (Exception ex) {
+                _logger.LogError(ex, "Add Store Location Failed!!");
+                return StatusCode(500, "Please try again later");
+            }
             await dbContext.SaveChangesAsync();
 
             return Ok(storeLocationObject);

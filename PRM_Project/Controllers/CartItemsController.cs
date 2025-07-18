@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PRM_Project.Models;
+using System.Net;
 
 namespace PRM_Project.Controllers
 {
@@ -21,8 +22,15 @@ namespace PRM_Project.Controllers
         [HttpGet]
         public async Task<ActionResult<List<CartItem>>> GetAllCartItems()
         {
-            var cartitems = await dbContext.CartItems.ToListAsync();
-            return Ok(cartitems);
+            try
+            {
+                var cartitems = await dbContext.CartItems.ToListAsync();
+                return Ok(cartitems);
+            }
+            catch (Exception ex) { 
+                return BadRequest(ex.Message);
+            }
+
         }
 
         [HttpGet]
@@ -49,10 +57,8 @@ namespace PRM_Project.Controllers
                 Quantity = cartItem.Quantity,
                 Price = cartItem.Price,
             };
-
             dbContext.CartItems.Add(cartItemObject);
             await dbContext.SaveChangesAsync();
-
             return Ok(cartItemObject);
 
         }

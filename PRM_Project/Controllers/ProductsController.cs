@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PRM_Project.Models;
@@ -12,10 +13,14 @@ namespace PRM_Project.Controllers
     public class ProductsController : ControllerBase
     {
         private readonly SalesAppDbContext dbContext;
+        private CategoriesController categoryController;
+        private ILogger logger;
 
-        public ProductsController(SalesAppDbContext dbContext)
+        public ProductsController(SalesAppDbContext dbContext, CategoriesController categoriesController, ILogger logger)
         {
             this.dbContext = dbContext;
+            this.categoryController = categoriesController;
+            this.logger = logger;
         }
 
         [HttpGet]
@@ -31,6 +36,43 @@ namespace PRM_Project.Controllers
         {
             var product = await dbContext.Products.FindAsync(id);
 
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(product);
+        }
+
+        [HttpGet]
+        [Route("/category/{categoryId:int}")]
+        public async Task<ActionResult<List<Product>>> GetProductByCategory(int categoryId)
+        {
+            var product = new List<Product>();
+            try
+            {
+                product = await dbContext.Products
+                    .Where(product => product.CategoryId == categoryId)
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "FatalError!!");
+                return StatusCode(500, "Please try again later");
+            }
+
+            if (product == null) {
+                return NotFound();
+            }
+
+            return Ok(product);
+        }
+
+        [HttpGet]
+        [Route("/search")]
+        public async Task<ActionResult<List<Product>>> SearchProducts(String name)
+        {
+            var product = await dbContext.Products.FindAsync(name);
             if (product == null)
             {
                 return NotFound();

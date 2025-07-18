@@ -12,10 +12,12 @@ namespace PRM_Project.Controllers
     public class CartsController : ControllerBase
     {
         private readonly SalesAppDbContext dbContext;
+        private CartItemsController cartItemsController;
 
-        public CartsController(SalesAppDbContext dbContext)
+        public CartsController(SalesAppDbContext dbContext, CartItemsController cartItemsController)
         {
             this.dbContext = dbContext;
+            this.cartItemsController = cartItemsController;
         }
 
         [HttpGet]
@@ -54,6 +56,14 @@ namespace PRM_Project.Controllers
 
             return Ok(cartObject);
 
+        }
+
+        [HttpPost]
+        [Route("/items")]
+        public async Task<ActionResult<List<CartItem>>> UpdateCartItemQuantity(int itemId, UpdateCartItemDTO updateCartItem)
+        {
+            var cartItem = new UpdateCartItemDTO();
+            
         }
 
         [HttpPut]
