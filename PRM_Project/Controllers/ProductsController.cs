@@ -13,13 +13,11 @@ namespace PRM_Project.Controllers
     public class ProductsController : ControllerBase
     {
         private readonly SalesAppDbContext dbContext;
-        private CategoriesController categoryController;
         private ILogger logger;
 
-        public ProductsController(SalesAppDbContext dbContext, CategoriesController categoriesController, ILogger logger)
+        public ProductsController(SalesAppDbContext dbContext, ILogger logger)
         {
             this.dbContext = dbContext;
-            this.categoryController = categoriesController;
             this.logger = logger;
         }
 

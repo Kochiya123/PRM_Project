@@ -58,13 +58,13 @@ namespace PRM_Project.Controllers
 
         }
 
-        [HttpPost]
+        /*[HttpPost]
         [Route("/items")]
         public async Task<ActionResult<List<CartItem>>> UpdateCartItemQuantity(int itemId, UpdateCartItemDTO updateCartItem)
         {
             var cartItem = new UpdateCartItemDTO();
             
-        }
+        }*/
 
         [HttpPut]
         [Route("{id:int}")]
