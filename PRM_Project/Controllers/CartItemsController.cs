@@ -63,7 +63,7 @@ namespace PRM_Project.Controllers
 
         }
 
-        [HttpPut]
+        /*[HttpPut]
         [Route("{id:int}")]
         public async Task<ActionResult<List<CartItem>>> UpdateCartItem(int id, UpdateCartItemDTO updateCartItem)
         {
@@ -82,7 +82,7 @@ namespace PRM_Project.Controllers
             await dbContext.SaveChangesAsync();
 
             return Ok(cartItem);
-        }
+        }*/
 
         [HttpDelete]
         [Route("{id:int}")]

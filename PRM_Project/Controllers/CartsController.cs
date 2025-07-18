@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PRM_Project.Models;
+using System.Security.Claims;
 
 namespace PRM_Project.Controllers
 {
@@ -13,17 +14,24 @@ namespace PRM_Project.Controllers
     {
         private readonly SalesAppDbContext dbContext;
         private CartItemsController cartItemsController;
+        ILogger<CartsController> logger;
 
-        public CartsController(SalesAppDbContext dbContext, CartItemsController cartItemsController)
+        public CartsController(SalesAppDbContext dbContext, CartItemsController cartItemsController, ILogger<CartsController> logger)
         {
             this.dbContext = dbContext;
             this.cartItemsController = cartItemsController;
+            this.logger = logger;
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<Cart>>> GetAllCarts()
+        public async Task<ActionResult<Cart>> GetUserCarts()
         {
-            var carts = await dbContext.Carts.ToListAsync();
+            var carts = FindCartByUserToken();
+
+            if (carts == null)
+            {
+                return NotFound();
+            }
             return Ok(carts);
         }
 
@@ -41,7 +49,7 @@ namespace PRM_Project.Controllers
             return Ok(cart);
         }
 
-        [HttpPost]
+        /*[HttpPost]
         public async Task<ActionResult<List<Cart>>> AddCart(AddCartDTO cart)
         {
             var cartObject = new Cart()
@@ -55,18 +63,66 @@ namespace PRM_Project.Controllers
             await dbContext.SaveChangesAsync();
 
             return Ok(cartObject);
-
-        }
-
-        /*[HttpPost]
-        [Route("/items")]
-        public async Task<ActionResult<List<CartItem>>> UpdateCartItemQuantity(int itemId, UpdateCartItemDTO updateCartItem)
-        {
-            var cartItem = new UpdateCartItemDTO();
-            
         }*/
 
-        [HttpPut]
+        [HttpGet]
+        [Route("/items")]
+        public async Task<ActionResult<CartItem>> AddItemToCart(CartItem addItem)
+        {
+            var carts = FindCartByUserToken();
+            if(carts == null)
+            {
+                return NotFound();
+            }
+
+            try
+            {
+                carts.CartItems.Add(addItem);
+                await dbContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "FatalError!!");
+                return StatusCode(500, "Please try again later");
+            }
+
+            return Ok(carts);
+        }
+
+
+        [HttpPost]
+        [Route("/items")]
+        public async Task<ActionResult<List<CartItem>>> UpdateCartItemQuantity(UpdateCartItemDTO updateCartItem)
+        {
+            var carts = FindCartByUserToken();
+            if(carts == null)
+            {
+                return NotFound();
+            }
+
+            List<CartItem> items = carts.CartItems.ToList();
+
+            CartItem item = items.Single(c => c.ProductId == updateCartItem.ProductId);
+            if(item == null)
+            {
+                return NotFound("Item not found");
+            }
+            try
+            {
+                item.Quantity = updateCartItem.Quantity;
+                await dbContext.SaveChangesAsync();
+            }
+            catch (Exception ex) 
+            {
+                logger.LogError(ex, "FatalError!!");
+                return StatusCode(500, "Please try again later");
+            }
+            
+
+            return Ok(carts);
+        }
+
+        /*[HttpPut]
         [Route("{id:int}")]
         public async Task<ActionResult<List<Cart>>> UpdateCart(int id,UpdateCartDTO updateCart) 
         {
@@ -83,7 +139,7 @@ namespace PRM_Project.Controllers
             await dbContext.SaveChangesAsync();
 
             return Ok(cart);
-        }
+        }*/
 
         [HttpDelete]
         [Route("{id:int}")]
@@ -100,5 +156,25 @@ namespace PRM_Project.Controllers
             return Ok();
         }
 
+
+
+
+
+
+        public Cart FindCartByUserToken()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            var carts = new Cart();
+
+            carts = dbContext.Carts.
+                Find(int.Parse(userId));
+
+            if (carts == null)
+            {
+                return null;
+            }
+            return carts;
+        }
     }
 }

@@ -9,13 +9,12 @@ namespace PRM_Project.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class ProductsController : ControllerBase
     {
         private readonly SalesAppDbContext dbContext;
-        private ILogger logger;
+        private ILogger<ProductsController> logger;
 
-        public ProductsController(SalesAppDbContext dbContext, ILogger logger)
+        public ProductsController(SalesAppDbContext dbContext, ILogger<ProductsController> logger)
         {
             this.dbContext = dbContext;
             this.logger = logger;
