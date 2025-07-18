@@ -127,7 +127,7 @@ namespace PRM_Project.Controllers
              token = new JwtSecurityTokenHandler().WriteToken(token),
              expiration = token.ValidTo
          });*/
-            var token = _jwtHelper.GenerateToken(dto.Username);
+            var token = _jwtHelper.GenerateToken(user);
             return Ok(new {
                 user.Id,
                 user.UserName,
