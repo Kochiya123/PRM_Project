@@ -1,23 +1,2 @@
 @PRM_Project_HostAddress = https://localhost:7125
 GET
-
-
-###
-
-@id=0
-DELETE {{PRM_Project_HostAddress}}/api/cart/{id:int}?id={{id}}
-
-###
-
-GET {{PRM_Project_HostAddress}}/api/cart/{id:int}?id={{id}}
-
-###
-
-PUT {{PRM_Project_HostAddress}}/api/cart/{id:int}?id={{id}}
-Content-Type: application/json
-
-{
-  //UpdateCartDTO
-}
-
-###

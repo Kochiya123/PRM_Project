@@ -102,6 +102,7 @@ builder.Services.AddIdentityCore<User>(options =>
 builder.Services.AddDbContext<SalesAppDbContext>(options =>
 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddSingleton<IEmailSender<User>, OpEmailSender>();
+builder.Services.AddScoped<CartService>();
 
 
 var app = builder.Build();

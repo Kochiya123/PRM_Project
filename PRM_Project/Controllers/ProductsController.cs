@@ -9,6 +9,7 @@ namespace PRM_Project.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ProductsController : ControllerBase
     {
         private readonly SalesAppDbContext dbContext;
@@ -42,31 +43,22 @@ namespace PRM_Project.Controllers
         }
 
         [HttpGet]
-        [Route("/category/{categoryId:int}")]
+        [Route("category/{categoryId:int}")]
         public async Task<ActionResult<List<Product>>> GetProductByCategory(int categoryId)
         {
-            var product = new List<Product>();
-            try
-            {
-                product = await dbContext.Products
+            List<Product> product = await dbContext.Products
                     .Where(product => product.CategoryId == categoryId)
                     .ToListAsync();
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "FatalError!!");
-                return StatusCode(500, "Please try again later");
-            }
 
             if (product == null) {
-                return NotFound();
+                return NotFound("No product was found!");
             }
 
             return Ok(product);
         }
 
         [HttpGet]
-        [Route("/search")]
+        [Route("search")]
         public async Task<ActionResult<List<Product>>> SearchProducts(String name)
         {
             var product = await dbContext.Products.FindAsync(name);
@@ -92,9 +84,17 @@ namespace PRM_Project.Controllers
                 CategoryId = product.CategoryId,
             };
 
-            dbContext.Products.Add(productObject);
-            await dbContext.SaveChangesAsync();
-
+            try
+            {
+                dbContext.Products.Add(productObject);
+                await dbContext.SaveChangesAsync();
+            }
+            catch (Exception ex) 
+            {
+                logger.LogError(ex, "FatalError!!");
+                return StatusCode(500, "Please try again later");
+            }
+            
             return Ok(productObject);
 
         }

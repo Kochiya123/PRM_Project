@@ -22,6 +22,22 @@ public partial class CartItem
 
 public partial class AddCartItemDTO
 {
+    public int ProductId { get; set; }
+
+    public int Quantity { get; set; }
+}
+
+public partial class UpdateCartItemDTO
+{
+    public long cartItemId { get; set; }
+
+    public int Quantity { get; set; }
+}
+
+public class CartItemResponse
+{
+    public int CartItemId { get; set; }
+
     public int? CartId { get; set; }
 
     public int? ProductId { get; set; }
@@ -29,13 +45,12 @@ public partial class AddCartItemDTO
     public int Quantity { get; set; }
 
     public decimal Price { get; set; }
-}
 
-public partial class UpdateCartItemDTO
-{
-    public int? ProductId { get; set; }
+    public decimal Subtotal { get; set; }
 
-    public int Quantity { get; set; }
+    public string ProductName { get; set; }
+
+    public string ProductImage { get; set; }
 }
 
 

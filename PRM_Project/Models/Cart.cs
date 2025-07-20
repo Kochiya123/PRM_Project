@@ -37,3 +37,23 @@ public partial class UpdateCartDTO
     public string Status { get; set; } = null!;
 
 }
+
+public class CartResponse
+{
+    public long CartId { get; set; }
+    public long? UserId { get; set; }
+    public string Status { get; set; }
+    public decimal TotalPrice { get; set; }
+    public List<CartItemResponse> Items { get; set; }
+    public int ItemCount { get; set; }
+}
+
+public class updateCartResponse 
+{
+    public long CartId { get; set; }
+    public long? UserId { get; set; }
+    public string Status { get; set; }
+    public decimal TotalPrice { get; set; }
+    public CartItemResponse Item { get; set; }
+    public int ItemCount { get; set; }
+}

@@ -7,7 +7,7 @@ using System.Net;
 
 namespace PRM_Project.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/carts")]
     [ApiController]
     [Authorize]
     public class CartItemsController : ControllerBase
@@ -47,7 +47,7 @@ namespace PRM_Project.Controllers
             return Ok(cartItems);
         }
 
-        [HttpPost]
+        /*[HttpPost]
         public async Task<ActionResult<List<CartItem>>> AddCartItem(AddCartItemDTO cartItem)
         {
             var cartItemObject = new CartItem()
@@ -61,7 +61,7 @@ namespace PRM_Project.Controllers
             await dbContext.SaveChangesAsync();
             return Ok(cartItemObject);
 
-        }
+        }*/
 
         /*[HttpPut]
         [Route("{id:int}")]
