@@ -8,19 +8,18 @@ using static System.Net.WebRequestMethods;
 
 namespace PRM_Project.Controllers
 {
-    [Route("api/store-location")]
+    [Route("api/store-locations")]
     [ApiController]
-    [Authorize]
     public class StoreLocationsController : ControllerBase
     {
         private readonly SalesAppDbContext dbContext;
-        private ILogger _logger;
+        private ILogger<StoreLocationsController> _logger;
         private readonly IMapper _mapper;
-        public StoreLocationsController(SalesAppDbContext dbContext, ILogger logger, IMapper mapper)
+        public StoreLocationsController(SalesAppDbContext dbContext, ILogger<StoreLocationsController> logger, IMapper mapper)
         {
             this.dbContext = dbContext;
-            this._logger = logger;
-            this._mapper = mapper;
+            _logger = logger;
+            _mapper = mapper;
         }
 
         [HttpGet]
