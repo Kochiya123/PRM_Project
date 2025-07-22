@@ -73,7 +73,6 @@ namespace PRM_Project.Controllers
                 return BadRequest(new { Errors = errors });
             }
 
-            // Create role if it doesn't exist
             if (!await _roleManager.RoleExistsAsync(dto.Role))
             {
                 await _roleManager.CreateAsync(new IdentityRole<int>(dto.Role));
@@ -97,7 +96,6 @@ namespace PRM_Project.Controllers
         public async Task<IActionResult> Login([FromBody] LoginDto dto, string? phoneNumber)
         {
             var user = await _userManager.FindByNameAsync(dto.Username);
-            //Thêm handling error phù hợp
             if (user == null)
             {
                 return NotFound("username not found!");

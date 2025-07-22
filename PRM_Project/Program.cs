@@ -10,6 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
 using Microsoft.Extensions.Options;
+using PRM_Project.Mapper;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -103,6 +104,7 @@ builder.Services.AddDbContext<SalesAppDbContext>(options =>
 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddSingleton<IEmailSender<User>, OpEmailSender>();
 builder.Services.AddScoped<CartService>();
+builder.Services.AddAutoMapper(typeof(AutoMapperProfile).Assembly);
 
 
 var app = builder.Build();

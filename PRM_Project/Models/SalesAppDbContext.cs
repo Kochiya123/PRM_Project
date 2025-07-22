@@ -178,6 +178,9 @@ public partial class SalesAppDbContext : IdentityDbContext<User, IdentityRole<in
             entity.Property(e => e.Address).HasMaxLength(255);
             entity.Property(e => e.Latitude).HasColumnType("decimal(9, 6)");
             entity.Property(e => e.Longitude).HasColumnType("decimal(9, 6)");
+            entity.Property(e => e.Name).HasMaxLength(255);
+            entity.Property(e => e.Phone).HasMaxLength(50);
+            entity.Property(e => e.OpeningHours).HasMaxLength(50);
         });
 
         modelBuilder.Entity<User>(entity =>

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -7,17 +8,19 @@ using static System.Net.WebRequestMethods;
 
 namespace PRM_Project.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/store-location")]
     [ApiController]
     [Authorize]
     public class StoreLocationsController : ControllerBase
     {
         private readonly SalesAppDbContext dbContext;
         private ILogger _logger;
-        public StoreLocationsController(SalesAppDbContext dbContext, ILogger logger)
+        private readonly IMapper _mapper;
+        public StoreLocationsController(SalesAppDbContext dbContext, ILogger logger, IMapper mapper)
         {
             this.dbContext = dbContext;
             this._logger = logger;
+            this._mapper = mapper;
         }
 
         [HttpGet]
@@ -42,14 +45,9 @@ namespace PRM_Project.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<List<StoreLocation>>> AddStoreLocation(AddStoreLocationDTO StoreLocation)
+        public async Task<ActionResult<List<StoreLocation>>> AddStoreLocation(StoreLocationDTO storeLocation)
         {
-            var storeLocationObject = new StoreLocation()
-            {
-                Latitude = StoreLocation.Latitude,
-                Longitude = StoreLocation.Longitude,
-                Address = StoreLocation.Address,
-            };
+            StoreLocation storeLocationObject = _mapper.Map<StoreLocation>(storeLocation);
             try
             {
                 dbContext.StoreLocations.Add(storeLocationObject);
@@ -66,7 +64,7 @@ namespace PRM_Project.Controllers
 
         [HttpPut]
         [Route("{id:int}")]
-        public async Task<ActionResult<List<StoreLocation>>> UpdateStoreLocation(int id, UpdateStoreLocationDTO updateStoreLocation)
+        public async Task<ActionResult<List<StoreLocation>>> UpdateStoreLocation(int id, StoreLocationDTO updateStoreLocation)
         {
             var storeLocation = await dbContext.StoreLocations.FindAsync(id);
 
@@ -75,9 +73,7 @@ namespace PRM_Project.Controllers
                 return NotFound(id);
             }
 
-            storeLocation.Latitude = updateStoreLocation.Latitude;
-            storeLocation.Longitude = updateStoreLocation.Longitude;
-            storeLocation.Address = updateStoreLocation.Address;
+            storeLocation = _mapper.Map<StoreLocation>(updateStoreLocation);
 
             await dbContext.SaveChangesAsync();
 

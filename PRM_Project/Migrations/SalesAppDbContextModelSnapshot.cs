@@ -444,6 +444,21 @@ namespace PRM_Project.Migrations
                     b.Property<decimal>("Longitude")
                         .HasColumnType("decimal(9, 6)");
 
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("OpeningHours")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
                     b.HasKey("LocationId")
                         .HasName("PK__StoreLoc__E7FEA477C5E0223E");
 

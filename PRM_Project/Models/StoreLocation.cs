@@ -12,22 +12,26 @@ public partial class StoreLocation
     public decimal Longitude { get; set; }
 
     public string Address { get; set; } = null!;
+
+    public string Name { get; set; }
+
+    public string Phone { get; set; }
+
+    public string OpeningHours { get; set; }
 }
 
-public partial class AddStoreLocationDTO
+public partial class StoreLocationDTO
 {
+
     public decimal Latitude { get; set; }
 
     public decimal Longitude { get; set; }
 
     public string Address { get; set; } = null!;
-}
 
-public partial class UpdateStoreLocationDTO
-{
-    public decimal Latitude { get; set; }
+    public string Name { get; set; }
 
-    public decimal Longitude { get; set; }
+    public string Phone { get; set; }
 
-    public string Address { get; set; } = null!;
+    public string OpeningHours { get; set; }
 }
