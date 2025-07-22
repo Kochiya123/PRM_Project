@@ -7,8 +7,14 @@ namespace PRM_Project.Mapper
     {
         public AutoMapperProfile() 
         {
-            CreateMap<StoreLocationDTO, StoreLocation>().ForMember(dest => dest.LocationId, opt => opt.Ignore());
+            CreateMap<StoreLocationDTO, StoreLocation>()
+                .ForMember(dest => dest.LocationId, opt => opt.Ignore());
 
+            CreateMap<UserDTO, User>()
+                .ForMember(dest => dest.PhoneNumber, opt => opt.Ignore())
+                .ForMember(dest => dest.Address, opt => opt.Ignore())
+                .ForMember(dest => dest.Role, opt => opt.MapFrom(src => src.Role ?? "Customer"));
+                
         }
     }
 }

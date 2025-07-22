@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -21,13 +22,15 @@ namespace PRM_Project.Controllers
         private readonly RoleManager<IdentityRole<int>> _roleManager;
         private readonly IConfiguration _config;
         private readonly TokenHelper _jwtHelper;
+        private readonly IMapper _mapper;
 
-        public UsersController(UserManager<User> userManager, RoleManager<IdentityRole<int>> roleManager, IConfiguration config, TokenHelper jwtTokenHelper)
+        public UsersController(UserManager<User> userManager, RoleManager<IdentityRole<int>> roleManager, IConfiguration config, TokenHelper jwtTokenHelper, IMapper mapper)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _config = config;
             _jwtHelper = jwtTokenHelper;
+            _mapper = mapper;
         }
 
         [HttpGet]
@@ -53,17 +56,10 @@ namespace PRM_Project.Controllers
 
         [HttpPost("signup")]
         [AllowAnonymous]
-        public async Task<IActionResult> AddUser(AddUserDTO dto)
+        public async Task<IActionResult> AddUser(UserDTO dto)
         {
-               
-               var user = new User
-               {
-                   UserName = dto.Username,
-                   Email = dto.Email,
-                   PhoneNumber = dto.PhoneNumber,
-                   Address = dto.Address,
-                   Role = dto.Role
-               };
+
+            var user = _mapper.Map<User>(dto);
 
             var result = await _userManager.CreateAsync(user, dto.Password);
 
@@ -93,7 +89,7 @@ namespace PRM_Project.Controllers
 
         [HttpPost("signin")]
         [AllowAnonymous]
-        public async Task<IActionResult> Login([FromBody] LoginDto dto, string? phoneNumber)
+        public async Task<IActionResult> Login([FromBody] LoginDTO dto, string? phoneNumber)
         {
             var user = await _userManager.FindByNameAsync(dto.Username);
             if (user == null)
@@ -139,16 +135,12 @@ namespace PRM_Project.Controllers
 
 
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> UpdateUser(int id, UpdateUserDTO dto)
+        public async Task<IActionResult> UpdateUser(int id, UserDTO dto)
         {
             var user = await _userManager.FindByIdAsync(id.ToString());
             if (user == null) return NotFound(id);
 
-            user.UserName = dto.Username;
-            user.Email = dto.Email;
-            user.PhoneNumber = dto.PhoneNumber;
-            user.Address = dto.Address;
-            user.Role = dto.Role;
+            user = _mapper.Map<User>(dto);
 
             var passwordHasher = new PasswordHasher<User>();
             user.PasswordHash = passwordHasher.HashPassword(user, dto.Password);
