@@ -11,6 +11,8 @@ using System.Text;
 using Microsoft.OpenApi.Models;
 using Microsoft.Extensions.Options;
 using PRM_Project.Mapper;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -99,6 +101,10 @@ builder.Services.AddIdentityCore<User>(options =>
 .AddUserManager<UserManager<User>>()
 .AddRoleManager<RoleManager<IdentityRole<int>>>();
 
+FirebaseApp.Create(new AppOptions()
+{
+    Credential = GoogleCredential.FromFile("D:\\Learning\\PRM\\PRM_Project\\chatscreenforandroidstudio-firebase-adminsdk-fbsvc-b9ed1b795d.json")
+});
 
 builder.Services.AddDbContext<SalesAppDbContext>(options =>
 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));

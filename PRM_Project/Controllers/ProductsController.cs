@@ -9,7 +9,7 @@ namespace PRM_Project.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+
     public class ProductsController : ControllerBase
     {
         private readonly SalesAppDbContext dbContext;
@@ -24,7 +24,25 @@ namespace PRM_Project.Controllers
         [HttpGet]
         public async Task<ActionResult<List<Product>>> GetAllProduct()
         {
-            var product = await dbContext.Products.ToListAsync();
+            var product = await dbContext.Products
+                .Include(p => p.Category)
+                .Select(p => new ProductDTO
+                {
+                    ProductId = p.ProductId,
+                    ProductName = p.ProductName,
+                    BriefDescription = p.BriefDescription,
+                    FullDescription = p.FullDescription,
+                    TechnicalSpecifications = p.TechnicalSpecifications,
+                    Price = p.Price,
+                    ImageUrl = p.ImageUrl,
+                    Category = p.Category == null ? null : new CategoryDTO
+                    {
+                        CategoryId = p.Category.CategoryId, 
+                        CategoryName = p.Category.CategoryName
+                    }
+                })
+                .ToListAsync();
+
             return Ok(product);
         }
 
@@ -32,7 +50,8 @@ namespace PRM_Project.Controllers
         [Route("{id:int}")]
         public async Task<ActionResult<Product>> GetProductbyID(int id)
         {
-            var product = await dbContext.Products.FindAsync(id);
+            var product = await dbContext.Products
+                .FindAsync(id);
 
             if (product == null)
             {
@@ -47,7 +66,7 @@ namespace PRM_Project.Controllers
         public async Task<ActionResult<List<Product>>> GetProductByCategory(int categoryId)
         {
             List<Product> product = await dbContext.Products
-                    .Where(product => product.CategoryId == categoryId)
+                    .Where(p => p.CategoryId == categoryId)
                     .ToListAsync();
 
             if (product == null) {

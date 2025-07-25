@@ -18,7 +18,7 @@ public partial class ChatMessage
 
 public partial class AddChatMessageDTO
 {
-    public int? UserId { get; set; }
+    public int? UserId { set; get; }
 
     public string? Message { get; set; }
 

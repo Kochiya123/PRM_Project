@@ -1,8 +1,15 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using FirebaseAdmin;
+using Firebase.Database;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PRM_Project.Models;
+using PRM_Project.Services;
+using System.Data.Entity;
+using System.Security.Claims;
+using Firebase.Database.Query;
+using AutoMapper;
 
 namespace PRM_Project.Controllers
 {
@@ -12,20 +19,35 @@ namespace PRM_Project.Controllers
     public class ChatMessagesController : ControllerBase
     {
         private readonly SalesAppDbContext dbContext;
+        private readonly FirebaseClient firebaseClient;
+        private readonly IMapper mapper;
 
-        public ChatMessagesController(SalesAppDbContext dbContext)
+        public ChatMessagesController(SalesAppDbContext dbContext, FirebaseClient firebaseClient, IMapper mapper)
         {
             this.dbContext = dbContext;
+            this.firebaseClient = firebaseClient;
+            this.mapper = mapper;
         }
 
         [HttpGet]
         public async Task<ActionResult<List<ChatMessage>>> GetAllChatMessages()
         {
-            var chatMessages = await dbContext.ChatMessages.ToListAsync();
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+            var chatMessages = await dbContext.ChatMessages
+                .Where(m => m.UserId == userId)
+                .OrderBy(m => m.SentAt)
+                .ToListAsync();
+
+            if(chatMessages ==  null || chatMessages.Count == 0) 
+            {
+                return NotFound("No messages has been sent yet!");
+            }
+
             return Ok(chatMessages);
         }
 
-        [HttpGet]
+        /*[HttpGet]
         [Route("{id:int}")]
         public async Task<ActionResult<ChatMessage>> GetchatMessagebyID(int id)
         {
@@ -37,26 +59,40 @@ namespace PRM_Project.Controllers
             }
 
             return Ok(chatMessage);
-        }
+        }*/
 
         [HttpPost]
-        public async Task<ActionResult<List<ChatMessage>>> AddchatMessage(AddChatMessageDTO chatMessage)
+        [Authorize]
+        public async Task<IActionResult> AddChatMessage([FromBody] AddChatMessageDTO dto)
         {
-            var chatMessageObject = new ChatMessage()
-            {
-                UserId = chatMessage.UserId,
-                Message = chatMessage.Message,
-                SentAt = DateTime.Now,
-            };
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null) 
+                return Unauthorized();
 
-            dbContext.ChatMessages.Add(chatMessageObject);
+            dto.UserId = int.Parse(userId);
+            var message = mapper.Map<ChatMessage>(dto);
+
+            dbContext.ChatMessages.Add(message);
             await dbContext.SaveChangesAsync();
 
-            return Ok(chatMessageObject);
+            // Push to Firebase
+            await firebaseClient
+                .Child("store-chats")
+                .Child(userId)
+                .Child("messages")
+                .PostAsync(new
+                {
+                    ChatMessageId = message.ChatMessageId,
+                    sender = userId,
+                    userId = userId,
+                    message = dto.Message,
+                    SentAt = DateTime.UtcNow.ToString()
+                });
 
+            return Ok();
         }
 
-        [HttpPut]
+        /*[HttpPut]
         [Route("{id:int}")]
         public async Task<ActionResult<List<ChatMessage>>> UpdatechatMessage(int id, UpdateChatMessageDTO updateMessage)
         {
@@ -87,7 +123,7 @@ namespace PRM_Project.Controllers
             dbContext.ChatMessages.Remove(chatMessage);
             await dbContext.SaveChangesAsync();
             return Ok();
-        }
+        }*/
 
     }
 }

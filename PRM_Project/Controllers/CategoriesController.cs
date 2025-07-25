@@ -8,7 +8,7 @@ namespace PRM_Project.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+
     public class CategoriesController : ControllerBase
     {
         private readonly SalesAppDbContext dbContext;
